@@ -243,13 +243,13 @@ function Acan(can::Canopy{N,N1, N12}, env, pars, vars) where {N,N1, N12}
     # Compute irradiance intercepted by each layer
     Ilayer, Ishade, _, fsun, _ = grey_canopy(can, env, pars, vars)
     # Compute CO2 assimilation/leaf area in each layer by separating shaded and sunlit fractions
-    Ashade, Asun = layer_assimilation(can, env, pars, Ishade, env.Ib0/sin(env.β))
+    Ashade, Asun = layer_assimilation(can, env, pars, Ishade./can.ΔL, env.Ib0/sin(env.β))
     # Scale up assimilation by leaf area in each layer and fraction
     Lsun   = can.ΔL.*fsun
     Lshade = can.ΔL.*(1.0 .- fsun)
     Alayer = Ashade.*Lshade .+ Asun.*Lsun
     # Canopy CO2 assimilation
-    return sum(Alayer), Alayer, Ilayer
+    return sum(Alayer), Alayer, Ilayer, fsun, Ashade, Asun
 end
 
 # Compute total daily assimilation in mol/m2
