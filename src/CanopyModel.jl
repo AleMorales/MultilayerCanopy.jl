@@ -16,7 +16,7 @@ struct Canopy{N, N1, N12}
     Rd25::SVector{N, Float64}
     Jmax25::SVector{N, Float64}
     α::SVector{N, Float64}
-    σ::SVector{N1, Float64}
+    sigma::SVector{N1, Float64}
 end
 
 # Create the canopy structure for each day (pre-allocations and pre-calculations)
@@ -45,9 +45,9 @@ function Canopy(pars, vars, ::Val{N} = Val(15)) where N
     Jmax25 = pars.aj.*f_Nt.*Np
     Rd25 = pars.f_Rd.*Vcmax25
     # Scattering coefficient of each layer from chlorophyll content (+ soil)
-    σ = vcat(1.0 .- α, pars.σ_soil)
+    sigma = vcat(1.0 .- α, pars.sigma_soil)
     # Construct the object
-    Canopy{N, N + 1, (N + 1)*(N + 1)}(ΔL, Lₘ, Lᵤ, Fu, Fd, fdif, Vcmax25,  Rd25, Jmax25, α, σ)
+    Canopy{N, N + 1, (N + 1)*(N + 1)}(ΔL, Lₘ, Lᵤ, Fu, Fd, fdif, Vcmax25,  Rd25, Jmax25, α, sigma)
 end
 
 # Extinction coefficients to different sectors of the sky given a leaf angle distribution
@@ -147,7 +147,7 @@ end
 # Update incoming scattered irradiance for each layer
 function update_scatter(can::Canopy{N,N1, N12}, Sio, SIp)::Tuple{SVector{N1, Float64}, Float64} where {N, N1, N12}
     # Compute scattered radiation emitted by each layer (from previous iteration)
-    So  = SIp .+ can.σ.*Sio./2.0
+    So  = SIp .+ can.sigma.*Sio./2.0
     # New intercepted scattered radiation by each layer
     Siu = can.Fu*So
     Sid = can.Fd*So
@@ -161,7 +161,7 @@ end
 # Iteratively compute scattered irradiance
 function calc_scatter(can::Canopy{N,N1, N12}, Ip)::Tuple{SVector{N, Float64}, Float64} where {N,N1, N12}
     # Scattering from incident primary radiation
-    SIp = Ip.*can.σ./2.0
+    SIp = Ip.*can.sigma./2.0
     # Resolve secondary scattering iteratively
     Si =  @SVector zeros(N + 1)
     Si, n = update_scatter(can, Si, SIp)
@@ -198,12 +198,12 @@ function kbeam(λ, β)
 end
 
 # Compute CO2 assimilation of a sunlit leaf based on the relevant solar angles
-function A_sun_ang(ang, β, Ω, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, Ca)::Float64
+function A_sun_ang(ang, β, Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, Ca)::Float64
     # The angles of the leaf
     @inbounds λ = ang[1]
     @inbounds α = ang[2]
     # The irradiance incident on the leaf
-    Iinc = Ishade + Ib*t(β, Ω, λ, α)
+    Iinc = Ishade + Ib*t(β, Omega, λ, α)
     # Compute gross CO2 assimilation with the model for the incident irradiance
     x1_j = J(k2ll, pars.theta, Jmax, Iinc)
     Aj = CalcAnC3(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca)
@@ -213,7 +213,7 @@ end
 
 # Integrate photosynthesis in the sunlit fraction over the leaf angle distribution
 function calc_Asun(env, pars, Ib, Ishade, Ac, Rd, k2ll, Jmax, gamma_star, gm, fvpd)
-    f = ang -> A_sun_ang(ang, env.β, env.Ω, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, env.Ca)
+    f = ang -> A_sun_ang(ang, env.β, env.Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, env.Ca)
     Aj = hcubature(f, SVector(0.0, 0.0), SVector(π/2, 2π), rtol = pars.angles.rtol, atol = 0.0, maxevals = 5_000)[1]
     min(Ac, Aj) + Rd
 end

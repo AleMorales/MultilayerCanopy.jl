@@ -16,11 +16,11 @@ function parameters(;
     # Electron transport
     theta = 0.7, # Curvature parameter
     Knc = 0.076/25.0, # Nc at which the leaf absorbs 50% of incoming PAR (mol/m2)
-    Φ2LL = 0.85, # PSII quantum yield at low light
-    Φ1LL = 1.0, # PSII quantum yield at low light
+    Phi2LL = 0.85, # PSII quantum yield at low light
+    Phi1LL = 1.0, # PSII quantum yield at low light
     fcyc = 0.1, # Fraction of cyclic electron transport
-    Topt_Φ2 = 22.5 + 273.15, # Optimal temperature of PSII quantum yield
-    Ω = 36.5, # σ/√2 in the Gaussian temperature function for PSII quantum yield
+    Topt_Phi2 = 22.5 + 273.15, # Optimal temperature of PSII quantum yield
+    Omega = 36.5, # sigma/√2 in the Gaussian temperature function for PSII quantum yield
     aj = 15.9e-3, # Ratio between Jmax25 and Nt (1/s)
     ks = 125.0, # Ratio between Ns and Jmax25 (s)
     E_Jmax = 30.0e3, # Activation energy Jmax (J/mol)
@@ -44,7 +44,7 @@ function parameters(;
     angles = LeafAngleModel(Spherical(), 1e-3),
     Ncmin   = 8.4e-3, # Minimum leaf nitrogen content (g N/g DW)
     # Other parameters related to light interception and climate
-    σ_soil = 0.21, # Albedo of the soil surface
+    sigma_soil = 0.21, # Albedo of the soil surface
     sky = ksky(angles, standard_sky(Val(10))),
     lat = 52.0,
     Ca = 4e2
@@ -61,11 +61,11 @@ function parameters(;
     E_Vcmax = E_Vcmax*1e3,
     theta = theta,
     Knc = Knc,
-    Φ2LL = Φ2LL,
-    Φ1LL = Φ1LL,
+    Phi2LL = Phi2LL,
+    Phi1LL = Phi1LL,
     fcyc = fcyc,
-    Topt_Φ2 = Topt_Φ2,
-    Ω = Ω,
+    Topt_Phi2 = Topt_Phi2,
+    Omega = Omega,
     aj = aj,
     ks = ks,
     E_Jmax = E_Jmax*1e3,
@@ -83,7 +83,7 @@ function parameters(;
     gb = gb,
     Ncmin = Ncmin,
     angles = angles,
-    σ_soil = 2*σ_soil, # Because it only reflects in one direction
+    sigma_soil = 2*sigma_soil, # Because it only reflects in one direction
     sky = sky,
     lat = toRadians(lat),
     Ca = Ca

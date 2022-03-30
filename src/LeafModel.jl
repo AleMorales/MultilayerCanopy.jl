@@ -19,13 +19,13 @@ const T0 =  298.15
 const O2 = 210e-3
 peaked(T, p25, E, S, D) = (p25*exp(((T - T0)*E)/(T0*R*T))*(1.0 + exp((T0*S - D)/(R*T0))))/(1.0 + exp((T*S - D)/(R*T)))
 arrhenius(T, p25, E) = p25*exp(((T - T0)*E)/(T0*R*T))
-parabolic(T, pOpt, Topt, Ω) = pOpt*exp(-(T - Topt)*(T - Topt)/(Ω*Ω))
+parabolic(T, pOpt, Topt, Omega) = pOpt*exp(-(T - Topt)*(T - Topt)/(Omega*Omega))
 
 # Apply tempeature correction
 function temperature_correction(α, Jmax25, Rd25, Vcmax25, Tleaf, VPD, pars)
     # Effect of temperature of photosynthetic traits and other calculations
-    Φ2 = parabolic(Tleaf, pars.Φ2LL, pars.Topt_Φ2, pars.Ω)
-    s = Φ2*(1.0 - pars.fcyc)/(1.0 - pars.fcyc + Φ2/pars.Φ1LL)
+    Φ2 = parabolic(Tleaf, pars.Phi2LL, pars.Topt_Phi2, pars.Omega)
+    s = Φ2*(1.0 - pars.fcyc)/(1.0 - pars.fcyc + Φ2/pars.Phi1LL)
     k2ll = α.*s
     Jmax = peaked.(Tleaf, Jmax25, pars.E_Jmax, pars.S_Jmax, pars.D_Jmax)
     Rd = arrhenius.(Tleaf, Rd25, pars.E_Rd)

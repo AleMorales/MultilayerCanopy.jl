@@ -71,8 +71,8 @@ end
 
 # Calculate solar azimuth angle
 function calcAzimuth(beta, dec, lat, morning)::Float64
-    Ω = acos(clamp((sin(dec) - sin(beta)*sin(lat))/(cos(beta)*cos(lat)), -1.0, 1.0))
-    morning ? Ω : 2π - Ω
+    Omega = acos(clamp((sin(dec) - sin(beta)*sin(lat))/(cos(beta)*cos(lat)), -1.0, 1.0))
+    morning ? Omega : 2π - Omega
 end
 
 
@@ -201,7 +201,7 @@ struct Environment
     Ib0::Float64
     Id0::Float64
     β::Float64
-    Ω::Float64
+    Omega::Float64
     Tleaf::Float64
     VPD::Float64
     Ca::Float64
