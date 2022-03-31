@@ -208,7 +208,7 @@ function A_sun_ang(ang, β, Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star,
     x1_j = J(k2ll, pars.theta, Jmax, Iinc)
     Aj = CalcAnC3(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca)
     # Multiply by the probability density of (λ, α) under the leaf angle distribution
-    Aj*pars.angles.fλ(λ)/2/π
+    Aj*pars.angles.f(λ)/2/π
 end
 
 # Integrate photosynthesis in the sunlit fraction over the leaf angle distribution

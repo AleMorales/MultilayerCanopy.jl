@@ -1,8 +1,8 @@
 
 """
-    LeafAngleModel(fλ, rtol)
+    LeafAngleModel(f, rtol)
 
-Combination of a leaf angle distribution object (fλ) and the relative tolerance
+Combination of a leaf angle distribution object (f) and the relative tolerance
 to be used by the different numerical algorithms that may be used (e.g. to compute
 extinction coefficients or average sunlit photosynthesis.)
 
@@ -12,9 +12,9 @@ lm = LeafAngleModel(Ellipsoidal(1), 1e-4)
 ```
 """
 struct LeafAngleModel{L}
-    fλ::L
+    f::L
     rtol::Float64
-    LeafAngleModel(fλ::L, rtol = 1e-4) where L = new{L}(fλ, rtol)
+    LeafAngleModel(f::L, rtol = 1e-4) where L = new{L}(f, rtol)
 end
 
 ####################################
@@ -192,7 +192,7 @@ end
 """
     k(β, L)
 Extinction coefficient for inclination angle β by averaging over all leaf
-azimuth and inclination angles assuming uniform leaf azimuth distribution and fλ
+azimuth and inclination angles assuming uniform leaf azimuth distribution and f
 inclination angle distribution.
 
 Implements Eqn 4 & 7 from Wang et al (2007) or Eqn 2.4 & 2.28 from Goudriaan (1977)
@@ -221,7 +221,7 @@ kb = k(β, L)
 ```
 """
 function k(β, L::LeafAngleModel)
-  out = quadgk(λ -> G(β, λ)*L.fλ(λ), 1e-6, π/2 - 1e-6, rtol = L.rtol)[1]
+  out = quadgk(λ -> G(β, λ)*L.f(λ), 1e-6, π/2 - 1e-6, rtol = L.rtol)[1]
   out*π/2.0/sin(β)
 end
 
@@ -229,7 +229,7 @@ end
 k(β, L::LeafAngleModel{Spherical}) = 0.5/sin(β)
 function k(β, L::LeafAngleModel{Ellipsoidal})
   tanβ = tan(β)
-  sqrt(L.fλ.χ*L.fλ.χ + 1/(tanβ*tanβ))/L.fλ.Λ
+  sqrt(L.f.χ*L.f.χ + 1/(tanβ*tanβ))/L.f.Λ
 end
 
 
