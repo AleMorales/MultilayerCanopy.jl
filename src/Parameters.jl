@@ -3,16 +3,15 @@
 function parameters(;
     # Rubisco CO2/O2 specificity
     Sco25 = 2800.0, # Sc/o parameter at 25 C (bar/bar)
-    E_Sco = -24.46e3, # Apparent activation energy of Sc/o (J/mol)
-    # Michaelis-Menten constants carboxylation
-    Kmc25 = 270.0e-6, # Km for CO2 at 25 C (bar)
-    E_Kmc = 80.99e3, # Activation energy of Kmc (J/mol)
-    # Michaelis-Menten constants oxygenation
-    Kmo25 = 165.0e-3, # Km for O2 at 25 C (bar)
-    E_Kmo = 23.72e3, # Activation energy of Kmo (J/mol)
+    E_Sco = -24.46, # Apparent activation energy of Sc/o (kJ/mol)
+    # Michaelis-Menten constants Rubisco
+    Kmc25 = 270.0, # Km for CO2 at 25 C (μmol/mol)
+    E_Kmc = 80.99, # Activation energy of Kmc (kJ/mol)
+    Kmo25 = 165.0, # Km for O2 at 25 C (mmol/mol)
+    E_Kmo = 23.72, # Activation energy of Kmo (kJ/mol)
     # Rubisco activity
     ar =3.5/786, # Ratio between Vcmax25 and Nr (1/s)
-    E_Vcmax = 65.33e3, # Activation energy of Vcmax (J/mol)
+    E_Vcmax = 65.33, # Activation energy of Vcmax (kJ/mol)
     # Electron transport
     theta = 0.7, # Curvature parameter
     Knc = 0.076/25.0, # Nc at which the leaf absorbs 50% of incoming PAR (mol/m2)
@@ -23,17 +22,17 @@ function parameters(;
     Omega = 36.5, # sigma/√2 in the Gaussian temperature function for PSII quantum yield
     aj = 15.9e-3, # Ratio between Jmax25 and Nt (1/s)
     ks = 125.0, # Ratio between Ns and Jmax25 (s)
-    E_Jmax = 30.0e3, # Activation energy Jmax (J/mol)
-    D_Jmax = 200.0e3, # Deactivation energy of Jmax (J/mol)
-    S_Jmax = 0.65e3, # Entropy coefficient of Jmax (J/mol/K)
+    E_Jmax = 30.0, # Activation energy Jmax (J/mol)
+    D_Jmax = 200.0, # Deactivation energy of Jmax (J/mol)
+    S_Jmax = 0.65, # Entropy coefficient of Jmax (J/mol/K)
     # Mitochondrial respiration
-    E_Rd = 46.39e3, # Activation energy of Rd (J/mol)
+    E_Rd = 46.39, # Activation energy of Rd (J/mol)
     f_Rd  = 0.01, # Ratio between Rd25 and Vcmax25
     # Mesophyll conductance
     gm25 = 0.4, # Mesophyll conductance (mol/m2/s)
-    E_gm = 70.2e3, # Activation energy gm (J/mol)
-    S_gm = 0.32e3, # Entropy coefficient of gm (J/mol/K)
-    D_gm = 94.0e3, # Deactivation energy of gm (J/mol)
+    E_gm = 70.2, # Activation energy gm (J/mol)
+    S_gm = 0.32, # Entropy coefficient of gm (J/mol/K)
+    D_gm = 94.0, # Deactivation energy of gm (J/mol)
     # Stomatal conductance
     gs0 = 0.05/1.56, # Minimum stomatal conductance (mol/m2/s)
     sgs = 3.0, # Scaling factor between gross assimilation and stomatal conductance
@@ -55,7 +54,7 @@ function parameters(;
     E_Sco = E_Sco*1e3,
     Kmc25 = Kmc25*1e-6,
     E_Kmc = E_Kmc*1e3,
-    Kmo25 = Kmo25*1e-6,
+    Kmo25 = Kmo25*1e-3,
     E_Kmo = E_Kmo*1e3,
     ar = ar,
     E_Vcmax = E_Vcmax*1e3,
@@ -96,7 +95,7 @@ function variables(pars;
     # Parameters related to growth
     nleaf  = 8.0, # Leaf nitrogen content (g N/m2)
     wleaf = 200.0, # Leaf biomass as dry weight (g/m2)
-    SLA = 300.0e-4, # Specific leaf area (m2/g)
+    SLA = 300.0, # Specific leaf area (m2/g)
     # Variables related to distribution of nitrogen within canopy and leaf
     kN   = 0.4, # Extinction coefficient of leaf nitrogen
     f_Ncmn = 0.1, # Minimum fraction of N allocated to chlorophyll
@@ -106,7 +105,7 @@ function variables(pars;
     f_Nrmx = 0.6, # Maximum fraction of N allocated to Rubisco
     pf_Nr  = 2.0 # Scaling constant for fraction of N allocated to Rubisco
 )
-
+    SLA = SLA/1e4
     # Constraint green LAI to avoid leaves with N < Nmin
     Ntotal = nleaf/14.0 # g/m2 -> mol/m2
     Nmin   = pars.Ncmin/SLA/14.0
