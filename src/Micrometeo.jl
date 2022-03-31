@@ -7,9 +7,9 @@ function uniform_sky(::Val{N}) where N
     Δθ = π/2/N
     θₗ  = SVector{N, Float64}(0.0:Δθ:π/2 - Δθ)
     θᵤ = SVector{N, Float64}(Δθ:Δθ:π/2)
-    β  = @. π/2 - (θₗ + θᵤ)/2
+    beta  = @. π/2 - (θₗ + θᵤ)/2
     f  = @. cos(θₗ)^2 - cos(θᵤ)^2
-    return (β = β, f = f)
+    return (beta = beta, f = f)
 end
 
 
@@ -18,9 +18,9 @@ function standard_sky(::Val{N}) where N
     Δθ = π/2/N
     θₗ  = SVector{N, Float64}(0.0:Δθ:π/2 - Δθ)
     θᵤ = SVector{N, Float64}(Δθ:Δθ:π/2)
-    β  = @. π/2 - (θₗ + θᵤ)/2
+    beta  = @. π/2 - (θₗ + θᵤ)/2
     f  = @. ((4cos(θₗ) + 3)*cos(θₗ)^2 - (4cos(θᵤ) + 3)*cos(θᵤ)^2)/7
-    return (β = β, f = f)
+    return (beta = beta, f = f)
 end
 
 # Transforms an angle from hexadecimal degrees to radians
@@ -200,7 +200,7 @@ end
 struct Environment
     Ib0::Float64
     Id0::Float64
-    β::Float64
+    beta::Float64
     Omega::Float64
     Tleaf::Float64
     VPD::Float64

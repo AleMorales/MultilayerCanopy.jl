@@ -163,8 +163,8 @@ end
 ####################################
 
 """
-    G(β, λ)
-Projection of leaves with inclination angle λ on direction with inclination angle β
+    G(beta, λ)
+Projection of leaves with inclination angle λ on direction with inclination angle beta
 averaged over all leaf azimuth angles assuming uniform leaf azimuth distribution.
 Eqn 2.3 from Goudriaan (1977) or Eqn 8 from Wang et al. (2007).
 
@@ -174,24 +174,24 @@ G(pi/2, pi/2)
 G(pi/2, 0)
 ```
 """
-function G(β, λ)
-  if λ ≤ β
-    sin(β)cos(λ)
+function G(beta, λ)
+  if λ ≤ beta
+    sin(beta)cos(λ)
   else
-    sinβ = sin(β)
-    cosβ = cos(β)
-    tanβ = sinβ/cosβ
+    sinbeta = sin(beta)
+    cosbeta = cos(beta)
+    tanbeta = sinbeta/cosbeta
     sinλ = sin(λ)
     cosλ = cos(λ)
     tanλ = sinλ/cosλ
-    2/π*(sinβ*cosλ*asin(tanβ/tanλ) + sqrt(sinλ*sinλ - sinβ*sinβ))
+    2/π*(sinbeta*cosλ*asin(tanbeta/tanλ) + sqrt(sinλ*sinλ - sinbeta*sinbeta))
   end
 end
 
 
 """
-    k(β, L)
-Extinction coefficient for inclination angle β by averaging over all leaf
+    k(beta, L)
+Extinction coefficient for inclination angle beta by averaging over all leaf
 azimuth and inclination angles assuming uniform leaf azimuth distribution and f
 inclination angle distribution.
 
@@ -206,30 +206,30 @@ For Spherical and Ellipsoidal distributions, analytical solutions from Goudriaan
 ```julia
 # Spherical distribution
 L = LeafAngleModel(Spherical())
-β = pi/4
-ks = k(β, L)
+beta = pi/4
+ks = k(beta, L)
 # Ellipsoidal distribution with X = 1
 L = LeafAngleModel(Ellipsoidal(1.0))
-ke = k(β, L)
+ke = k(beta, L)
 # Beta distribution approximating the Spherical distribution
 t̄ = 0.6371907
 vt = 0.1600465
 μ = (1 - t̄)*(t̄*(1 - t̄)/vt - 1)
 ν = t̄/(1 - t̄)*μ
 L = LeafAngleModel(Beta(μ, ν))
-kb = k(β, L)
+kb = k(beta, L)
 ```
 """
-function k(β, L::LeafAngleModel)
-  out = quadgk(λ -> G(β, λ)*L.f(λ), 1e-6, π/2 - 1e-6, rtol = L.rtol)[1]
-  out*π/2.0/sin(β)
+function k(beta, L::LeafAngleModel)
+  out = quadgk(λ -> G(beta, λ)*L.f(λ), 1e-6, π/2 - 1e-6, rtol = L.rtol)[1]
+  out*π/2.0/sin(beta)
 end
 
 # Analytical solutions for spherical and Ellipsoidal distributions
-k(β, L::LeafAngleModel{Spherical}) = 0.5/sin(β)
-function k(β, L::LeafAngleModel{Ellipsoidal})
-  tanβ = tan(β)
-  sqrt(L.f.X*L.f.X + 1/(tanβ*tanβ))/L.f.Lambda
+k(beta, L::LeafAngleModel{Spherical}) = 0.5/sin(beta)
+function k(beta, L::LeafAngleModel{Ellipsoidal})
+  tanbeta = tan(beta)
+  sqrt(L.f.X*L.f.X + 1/(tanbeta*tanbeta))/L.f.Lambda
 end
 
 
@@ -254,17 +254,17 @@ function scattered_model(L::LeafAngleModel, nθ, DeltaL)
     Δθ = π/2/nθ
     θₗ = 0.0:Δθ:π/2 - Δθ
     θᵤ = Δθ:Δθ:π/2
-    βs = @. π/2 - (θₗ + θᵤ)/2
-    ks = [k(β, L) for β in βs]
+    betas = @. π/2 - (θₗ + θᵤ)/2
+    ks = [k(beta, L) for beta in betas]
     f = @. (cos(θₗ)^2 - cos(θᵤ)^2)*exp(-ks*DeltaL)
     f /= sum(f)
-    return (β = βs, f = f)
+    return (beta = betas, f = f)
 end
 
 
 """
-    t(β, ϕ, λ, alpha)
-Cosine of the angle of incidence between a solar ray with elevation β and 
+    t(beta, ϕ, λ, alpha)
+Cosine of the angle of incidence between a solar ray with elevation beta and 
 azimuth ϕ and a leaf with elevation angle λ and azimuth orientation alpha. Notice
 that we take the absolute value as the sign of the expression depends on the
 side of the leaf (we assume same rate of photosynthesis on both sides). This
@@ -275,5 +275,5 @@ implements Eqn. 2.1 by Goudriaan (1977).
 t(π/4, π/3, π/5, 0.0)
 ```
 """
-t(β, ϕ, λ, alpha) = abs(sin(β)*cos(λ) + cos(β)*sin(λ)*cos(alpha - ϕ))
+t(beta, ϕ, λ, alpha) = abs(sin(beta)*cos(λ) + cos(beta)*sin(λ)*cos(alpha - ϕ))
 

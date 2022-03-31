@@ -30,7 +30,7 @@ function Canopy(pars, vars, ::Val{N} = Val(15)) where N
     updated_sky = ksky(pars.angles, pars.sky) 
     fdif = calc_fdiff(Lu, updated_sky)
     # Matrices for redistribution of scattered radiation
-    nθ = length(updated_sky.β)
+    nθ = length(updated_sky.beta)
     Fu, Fd = calc_fscat(DeltaL,nθ, Lu, pars.angles)
     # Distribution of total nitrogen and N partitioning coefficients within canopy
     Np = @. 0.65*(vars.Nlmax*exp(-vars.kN*Lm) - vars.Nmin)
@@ -54,8 +54,8 @@ end
 # and Gaussian-Legendre integrator (not needed for some distributions). This function also
 # returns the values contained inside sky to be reused later on. 
 function ksky(angles, sky) 
-    ks = SVector{length(sky.β), Float64}(k(β, angles) for β in sky.β)
-    (k = ks, β = sky.β, f = sky.f)    
+    ks = SVector{length(sky.beta), Float64}(k(beta, angles) for beta in sky.beta)
+    (k = ks, beta = sky.beta, f = sky.f)    
 end
 
 
@@ -114,7 +114,7 @@ function black_canopy(can::Canopy{N, N1, N12}, env, pars, vars) where {N, N1, N1
     # Calculate the diffuse light intercepted by each layer
     Id = env.Id0.*can.fdif
     # Calculate the average irradiance increase due to direct solar radiation
-    kb    = calc_kdir(env.β, pars.angles)
+    kb    = calc_kdir(env.beta, pars.angles)
     fsun  = exp.(.-kb.*can.Lm)
     f_dir = calc_fdir(can, kb)
     Ib    = env.Ib0.*f_dir
@@ -129,8 +129,8 @@ function black_canopy(can::Canopy{N, N1, N12}, env, pars, vars) where {N, N1, N1
     return Ip, Id, Ib, fsun
 end
 
-# Compute the extinction coefficient to direct solar radiation with angle β
-calc_kdir(β, angles) = k(β, angles)
+# Compute the extinction coefficient to direct solar radiation with angle beta
+calc_kdir(beta, angles) = k(beta, angles)
 
 # Compute the fraction of direct solar radiation on top of canopy that is 
 # absorbed by a particular canopy layer
@@ -189,21 +189,21 @@ end
 ###############################################################################
 
 # Compute the projection of beam solar irradiance onto a leaf angle
-function kbeam(λ, β)
-    if β >= λ  
+function kbeam(λ, beta)
+    if beta >= λ  
         cos(λ) 
     else     
-        2/π*(cos(λ)*asin(tan(β)/tan(λ)) + sqrt(sin(λ)^2 - sin(β)^2)/sin(β))
+        2/π*(cos(λ)*asin(tan(beta)/tan(λ)) + sqrt(sin(λ)^2 - sin(beta)^2)/sin(beta))
     end
 end
 
 # Compute CO2 assimilation of a sunlit leaf based on the relevant solar angles
-function A_sun_ang(ang, β, Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, Ca)::Float64
+function A_sun_ang(ang, beta, Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, Ca)::Float64
     # The angles of the leaf
     @inbounds λ = ang[1]
     @inbounds alpha = ang[2]
     # The irradiance incident on the leaf
-    Iinc = Ishade + Ib*t(β, Omega, λ, alpha)
+    Iinc = Ishade + Ib*t(beta, Omega, λ, alpha)
     # Compute gross CO2 assimilation with the model for the incident irradiance
     x1_j = J(k2ll, pars.theta, Jmax, Iinc)
     Aj = CalcAnC3(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca)
@@ -213,7 +213,7 @@ end
 
 # Integrate photosynthesis in the sunlit fraction over the leaf angle distribution
 function calc_Asun(env, pars, Ib, Ishade, Ac, Rd, k2ll, Jmax, gamma_star, gm, fvpd)
-    f = ang -> A_sun_ang(ang, env.β, env.Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, env.Ca)
+    f = ang -> A_sun_ang(ang, env.beta, env.Omega, Ib, Ishade, pars, Rd, k2ll, Jmax, gamma_star, gm, fvpd, env.Ca)
     Aj = hcubature(f, SVector(0.0, 0.0), SVector(π/2, 2π), rtol = pars.angles.rtol, atol = 0.0, maxevals = 5_000)[1]
     min(Ac, Aj) + Rd
 end
@@ -243,7 +243,7 @@ function Acan(can::Canopy{N,N1, N12}, env, pars, vars) where {N,N1, N12}
     # Compute irradiance intercepted by each layer
     Ilayer, Ishade, _, fsun, _ = grey_canopy(can, env, pars, vars)
     # Compute CO2 assimilation/leaf area in each layer by separating shaded and sunlit fractions
-    Ashade, Asun = layer_assimilation(can, env, pars, Ishade./can.DeltaL, env.Ib0/sin(env.β))
+    Ashade, Asun = layer_assimilation(can, env, pars, Ishade./can.DeltaL, env.Ib0/sin(env.beta))
     # Scale up assimilation by leaf area in each layer and fraction
     Lsun   = can.DeltaL.*fsun
     Lshade = can.DeltaL.*(1.0 .- fsun)
