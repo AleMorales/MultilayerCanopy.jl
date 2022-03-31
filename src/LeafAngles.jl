@@ -125,9 +125,9 @@ end
 (b::Beta)(λ) = (t = 2/pi*λ; ((1 - t)^(b.μ - 1)*t^(b.ν - 1))/beta(b.μ, b.ν))
 
 """
-    Ellipsoidal(χ)
+    Ellipsoidal(X)
 Functor that implements the ellipsoidal leaf angle distribution from Campbell (1986)
-where χ is an empirical parameter
+where X is an empirical parameter
 
 # Examples
 ```julia
@@ -136,26 +136,26 @@ e(pi/2)
 ```
 """
 struct Ellipsoidal <: LeafAngle
-  χ::Float64
-  Λ::Float64
+  X::Float64
+  Lambda::Float64
 end
-function Ellipsoidal(χ)
-  if χ < 1
-    ϵ = sqrt(1 - χ*χ)
-    Λ = χ + asin(ϵ)/ϵ
-  elseif χ == 1
-    Λ = 2
+function Ellipsoidal(X)
+  if X < 1
+    ϵ = sqrt(1 - X*X)
+    Lambda = X + asin(ϵ)/ϵ
+  elseif X == 1
+    Lambda = 2
   else
-    ϵ = sqrt(1 - 1/(χ*χ))
-    Λ = χ + log((1 + ϵ)/(1 - ϵ))/(2*ϵ*χ)
+    ϵ = sqrt(1 - 1/(X*X))
+    Lambda = X + log((1 + ϵ)/(1 - ϵ))/(2*ϵ*X)
   end
-  Ellipsoidal(χ, Λ)
+  Ellipsoidal(X, Lambda)
 end
 function (e::Ellipsoidal)(λ)
   sinλ = sin(λ)
   cosλ = cos(λ)
-  den = (cosλ*cosλ + e.χ*e.χ*sinλ*sinλ)
-  2*e.χ*e.χ*e.χ*sinλ/(e.Λ*den*den)
+  den = (cosλ*cosλ + e.X*e.X*sinλ*sinλ)
+  2*e.X*e.X*e.X*sinλ/(e.Lambda*den*den)
 end
 
 ####################################
@@ -208,7 +208,7 @@ For Spherical and Ellipsoidal distributions, analytical solutions from Goudriaan
 L = LeafAngleModel(Spherical())
 β = pi/4
 ks = k(β, L)
-# Ellipsoidal distribution with χ = 1
+# Ellipsoidal distribution with X = 1
 L = LeafAngleModel(Ellipsoidal(1.0))
 ke = k(β, L)
 # Beta distribution approximating the Spherical distribution
@@ -229,7 +229,7 @@ end
 k(β, L::LeafAngleModel{Spherical}) = 0.5/sin(β)
 function k(β, L::LeafAngleModel{Ellipsoidal})
   tanβ = tan(β)
-  sqrt(L.f.χ*L.f.χ + 1/(tanβ*tanβ))/L.f.Λ
+  sqrt(L.f.X*L.f.X + 1/(tanβ*tanβ))/L.f.Lambda
 end
 
 
