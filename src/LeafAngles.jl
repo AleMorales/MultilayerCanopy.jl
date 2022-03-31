@@ -238,10 +238,10 @@ end
 ####################################
 
 """
-    scattered_model(L, nθ, ΔL)
+    scattered_model(L, nθ, DeltaL)
 Calculate angular distribution of scattered radiation as a modification of the 
 uniform distribution, where L is the `LeafAngleModel` object, nθ is the number of
-angles in which we will subdivide the hemisphere and ΔL is the leaf area of a layer
+angles in which we will subdivide the hemisphere and DeltaL is the leaf area of a layer
 in the canopy. This is an implementation of Eqn. 2.35 by Goudriaan (1977).
  
 # Examples
@@ -250,22 +250,22 @@ L = LeafAngleModel(Spherical())
 scattered_model(L, 10, 0.1)
 ```
 """
-function scattered_model(L::LeafAngleModel, nθ, ΔL)
+function scattered_model(L::LeafAngleModel, nθ, DeltaL)
     Δθ = π/2/nθ
     θₗ = 0.0:Δθ:π/2 - Δθ
     θᵤ = Δθ:Δθ:π/2
     βs = @. π/2 - (θₗ + θᵤ)/2
     ks = [k(β, L) for β in βs]
-    f = @. (cos(θₗ)^2 - cos(θᵤ)^2)*exp(-ks*ΔL)
+    f = @. (cos(θₗ)^2 - cos(θᵤ)^2)*exp(-ks*DeltaL)
     f /= sum(f)
     return (β = βs, f = f)
 end
 
 
 """
-    t(β, ϕ, λ, α)
+    t(β, ϕ, λ, alpha)
 Cosine of the angle of incidence between a solar ray with elevation β and 
-azimuth ϕ and a leaf with elevation angle λ and azimuth orientation α. Notice
+azimuth ϕ and a leaf with elevation angle λ and azimuth orientation alpha. Notice
 that we take the absolute value as the sign of the expression depends on the
 side of the leaf (we assume same rate of photosynthesis on both sides). This
 implements Eqn. 2.1 by Goudriaan (1977).
@@ -275,5 +275,5 @@ implements Eqn. 2.1 by Goudriaan (1977).
 t(π/4, π/3, π/5, 0.0)
 ```
 """
-t(β, ϕ, λ, α) = abs(sin(β)*cos(λ) + cos(β)*sin(λ)*cos(α - ϕ))
+t(β, ϕ, λ, alpha) = abs(sin(β)*cos(λ) + cos(β)*sin(λ)*cos(alpha - ϕ))
 

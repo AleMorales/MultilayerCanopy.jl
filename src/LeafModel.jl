@@ -22,11 +22,11 @@ arrhenius(T, p25, E) = p25*exp(((T - T0)*E)/(T0*R*T))
 parabolic(T, pOpt, Topt, Omega) = pOpt*exp(-(T - Topt)*(T - Topt)/(Omega*Omega))
 
 # Apply tempeature correction
-function temperature_correction(α, Jmax25, Rd25, Vcmax25, Tleaf, VPD, pars)
+function temperature_correction(alpha, Jmax25, Rd25, Vcmax25, Tleaf, VPD, pars)
     # Effect of temperature of photosynthetic traits and other calculations
     Φ2 = parabolic(Tleaf, pars.Phi2LL, pars.Topt_Phi2, pars.Omega)
     s = Φ2*(1.0 - pars.fcyc)/(1.0 - pars.fcyc + Φ2/pars.Phi1LL)
-    k2ll = α.*s
+    k2ll = alpha.*s
     Jmax = peaked.(Tleaf, Jmax25, pars.E_Jmax, pars.S_Jmax, pars.D_Jmax)
     Rd = arrhenius.(Tleaf, Rd25, pars.E_Rd)
     Vcmax = arrhenius.(Tleaf, Vcmax25, pars.E_Vcmax)
@@ -52,14 +52,14 @@ function Ag(pars, Np, f_Nc, f_Nr, VPD, PAR, Tleaf, Ca)
     f_No = 1.0 .- f_Nc .- f_Nr
     f_Nt = f_No./(1.0 .+ pars.aj.*pars.ks)
     Nc = f_Nc.*Np
-    α = Nc./(Nc .+ pars.Knc)
+    alpha = Nc./(Nc .+ pars.Knc)
     Vcmax25 = pars.ar.*f_Nr.*Np
     Jmax25 = pars.aj.*f_Nt.*Np
     Rd25 = pars.f_Rd.*Vcmax25
 
     # Apply temperature corrections and compute derived traits
     k2ll, Jmax, Vcmax, Kmapp, Rd, gamma_star, gm, fvpd = 
-                        temperature_correction(α, Jmax25, Rd25, Vcmax25, Tleaf, VPD, pars)
+                        temperature_correction(alpha, Jmax25, Rd25, Vcmax25, Tleaf, VPD, pars)
 
     # Photosynthesis limited by Rubisco per layer
     Ac = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, Kmapp, Vcmax, gamma_star, Rd, Ca)
