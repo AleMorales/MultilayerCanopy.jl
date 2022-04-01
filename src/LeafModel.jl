@@ -14,7 +14,7 @@ function CalcAnC3(gm, gs0, fvpd, gb, x2, x1, gamma_star, Rd, Ca)::Float64
     A = -2.0*sqrt(Q)*cos(psi/3.0) - p/3.0
 end
 
-const R =  8310.0
+const R =  8.310
 const T0 =  298.15
 const O2 = 210e-3
 peaked(T, p25, E, S, D) = (p25*exp(((T - T0)*E)/(T0*R*T))*(1.0 + exp((T0*S - D)/(R*T0))))/(1.0 + exp((T*S - D)/(R*T)))
