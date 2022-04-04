@@ -22,17 +22,17 @@ function parameters(;
     Omega = 36.5, # sigma/√2 in the Gaussian temperature function for PSII quantum yield
     aj = 15.9e-3, # Ratio between Jmax25 and Nt (1/s)
     ks = 125.0, # Ratio between Ns and Jmax25 (s)
-    E_Jmax = 30.0, # Activation energy Jmax (J/mol)
-    D_Jmax = 200.0, # Deactivation energy of Jmax (J/mol)
-    S_Jmax = 0.65, # Entropy coefficient of Jmax (J/mol/K)
+    E_Jmax = 30.0, # Activation energy Jmax (kJ/mol)
+    D_Jmax = 200.0, # Deactivation energy of Jmax (kJ/mol)
+    S_Jmax = 0.65, # Entropy coefficient of Jmax (kJ/mol/K)
     # Mitochondrial respiration
-    E_Rd = 46.39, # Activation energy of Rd (J/mol)
+    E_Rd = 46.39, # Activation energy of Rd (kJ/mol)
     f_Rd  = 0.01, # Ratio between Rd25 and Vcmax25
     # Mesophyll conductance
     gm25 = 0.4, # Mesophyll conductance (mol/m2/s)
-    E_gm = 70.2, # Activation energy gm (J/mol)
-    S_gm = 0.32, # Entropy coefficient of gm (J/mol/K)
-    D_gm = 94.0, # Deactivation energy of gm (J/mol)
+    E_gm = 70.2, # Activation energy gm (kJ/mol)
+    S_gm = 0.32, # Entropy coefficient of gm (kJ/mol/K)
+    D_gm = 94.0, # Deactivation energy of gm (kJ/mol)
     # Stomatal conductance
     gs0 = 0.05/1.56, # Minimum stomatal conductance (mol/m2/s)
     sgs = 3.0, # Scaling factor between gross assimilation and stomatal conductance
