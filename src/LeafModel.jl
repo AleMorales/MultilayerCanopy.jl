@@ -69,11 +69,17 @@ function Ag(pars, Np, f_Nc, f_Nr, VPD, PAR, Tleaf, Ca)
     Aj = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca)
 
     # Take the minimum of the two
-    Ag = min.(Ac, Aj) .+ Rd
+    A = min.(Ac, Aj)
+    Ag = A .+ Rd
+
+    # Compute Jc
+    Ccc  = Vcmax.*gamma_star./((Vcmax .- Ag).*Ag.*Kmapp)
+    Jc   = Ag.*(4.0.*Ccc .+ 8.0.*gamma_star)./(Ccc .- gamma_star)
 
     # Excess photosynthesis if PSII quantum yield is maintained
-    x1_j = k2ll.*PAR./4.0
-    E = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca) .+ Rd .- Ag
+    Jpot = k2ll.*PAR
+    Jact = min.(x1_j.*4, Jc)
+    E    = Jpot .- Jact
 
-    return (Ag = Ag, A = min.(Ac, Aj), Ac= Ac, Aj = Aj, E = E, rE = E./(E .+ Ag))
+    return (Ag = Ag, A = min.(Ac, Aj), Ac= Ac, Aj = Aj, E = E, rE = E./Jpot)
 end
