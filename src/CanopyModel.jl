@@ -219,7 +219,7 @@ function calc_Asun(env, pars, Ib, Ishade, Ac, Rd, k2ll, Jmax, gamma_star, gm, fv
 end
 
 # Given irradiances and photosynthetic parametes per layer, compute CO2 assimilation for shaded and sunlit fractions
-function layer_assimilation(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib) where {N,N1, N12}
+function layer_assimilation(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib0, Isun) where {N,N1, N12}
 
     k2ll, Jmax, Vcmax, Kmapp, Rd, gamma_star, gm, fvpd = 
             temperature_correction(can.alpha, can.Jmax25, can.Rd25, can.Vcmax25, env.Tleaf, env.VPD, pars)
@@ -231,31 +231,61 @@ function layer_assimilation(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib) where
     x1_j = J.(k2ll, pars.theta, Jmax, Ishade)
     Aj = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, env.Ca)
     Ashade  = min.(Ac, Aj) .+ Rd
-
+    
+    # Excess photosynthesis of shade leaves
+    x1_j = k2ll.*Ishade./4.0
+    Eshade = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, env.Ca) .+ Rd .- Ashade
+    
     # Calculate photosynthesis of sunlit leaves
-    @inbounds Asun = SVector{N, Float64}(calc_Asun(env, pars, Ib, Ishade[i], Ac[i], Rd[i], k2ll[i], Jmax[i],
+    @inbounds Asun = SVector{N, Float64}(calc_Asun(env, pars, Ib0, Ishade[i], Ac[i], Rd[i], k2ll[i], Jmax[i],
                                                    gamma_star, gm, fvpd) for i in 1:N)
-    return Ashade, Asun
+
+    # Excess photosynthesis of sun leaves
+    x1_j = k2ll.*Isun./4.0
+    Esun = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, env.Ca) .+ Rd .- Asun
+
+    return Ashade, Asun, Eshade, Esun
 end
 
 # Compute canopy photosynthesis
 function Acan(can::Canopy{N,N1, N12}, env, pars, vars) where {N,N1, N12}
     # Compute irradiance intercepted by each layer
-    Ilayer, Ishade, _, fsun, _ = grey_canopy(can, env, pars, vars)
+    Ilayer, Ishade, Ib, fsun, _ = grey_canopy(can, env, pars, vars)
+    Isun  = Ishade./can.DeltaL .+ Ib./can.DeltaL./(fsun .+ eps(Float64))
     # Compute CO2 assimilation/leaf area in each layer by separating shaded and sunlit fractions
-    Ashade, Asun = layer_assimilation(can, env, pars, Ishade./can.DeltaL, env.Ib0/sin(env.beta))
+    Ashade, Asun, Eshade, Esun = layer_assimilation(can, env, pars, Ishade./can.DeltaL, env.Ib0/sin(env.beta), Isun)
     # Scale up assimilation by leaf area in each layer and fraction
     Lsun   = can.DeltaL.*fsun
     Lshade = can.DeltaL.*(1.0 .- fsun)
     Alayer = Ashade.*Lshade .+ Asun.*Lsun
+    Elayer = Eshade.*Lshade .+ Esun.*Lsun
     # Canopy CO2 assimilation
-    return sum(Alayer), Alayer, Ilayer, fsun, Ashade, Asun
+    return (Acan = sum(Alayer), Alayer = Alayer, # 1, 2
+            Ican = sum(Ilayer), Ilayer = Ilayer, # 3,4
+            fsun = fsun, Ashade = Ashade, Asun = Asun, # 5, 6, 7
+            Ecan = sum(Elayer), Elayer = Elayer, Eshade = Eshade, Esun = Esun) # 8, 9, 10, 11
 end
 
 # Compute total daily assimilation in mol/m2
 function calc_Adiurnal(weather, can, pars,vars, method)
-    f = t -> Acan(can, interpolate_meteo(weather, t), pars, vars)[1]
+    f = t -> Acan(can, interpolate_meteo(weather, t), pars, vars)[:Acan]
     Aday = integrate(method, f, 1e-6, weather.DL - 1e-6)
     # Convert from mol/m2/s to mol/m2
     return Aday*3600.0
+end
+
+# Compute total daily excess assimilation in mol/m2
+function calc_Ediurnal(weather, can, pars,vars, method)
+    f = t -> Acan(can, interpolate_meteo(weather, t), pars, vars)[:Ecan]
+    Eday = integrate(method, f, 1e-6, weather.DL - 1e-6)
+    # Convert from mol/m2/s to mol/m2
+    return Eday*3600.0
+end
+
+# Compute total daily intercepted PAR in mol/m2
+function calc_PARdiurnal(weather, can, pars,vars, method)
+    f = t -> Acan(can, interpolate_meteo(weather, t), pars, vars)[:Ican]
+    PARday = integrate(method, f, 1e-6, weather.DL - 1e-6)
+    # Convert from mol/m2/s to mol/m2
+    return PARday*3600.0
 end

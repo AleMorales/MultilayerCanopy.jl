@@ -10,7 +10,7 @@ function CalcAnC3(gm, gs0, fvpd, gb, x2, x1, gamma_star, Rd, Ca)::Float64
     r = (-a*b)/m
     U = (2.0*p^3.0 - 9.0*p*q + 27.0*r)/54.0
     Q = (p^2.0 - 3.0*q)/9.0
-    psi = acos(U/sqrt(Q^3.0))
+    psi = acos(clamp(U/sqrt(Q^3.0),-1.0, 1.0))
     A = -2.0*sqrt(Q)*cos(psi/3.0) - p/3.0
 end
 
@@ -69,7 +69,11 @@ function Ag(pars, Np, f_Nc, f_Nr, VPD, PAR, Tleaf, Ca)
     Aj = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca)
 
     # Take the minimum of the two
-    A = min.(Ac, Aj) .+ Rd
+    Ag = min.(Ac, Aj) .+ Rd
 
-    return A, min.(Ac, Aj), Ac, Aj
+    # Excess photosynthesis if PSII quantum yield is maintained
+    x1_j = k2ll.*PAR./4.0
+    E = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, 2.0*gamma_star, x1_j, gamma_star, Rd, Ca) .+ Rd .- Ag
+
+    return (Ag = Ag, A = min.(Ac, Aj), Ac= Ac, Aj = Aj, E = E, rE = E./(E .+ Ag))
 end
