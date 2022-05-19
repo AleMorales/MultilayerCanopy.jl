@@ -29,7 +29,8 @@ function parameters(;
     E_Rd = 46.39, # Activation energy of Rd (kJ/mol)
     f_Rd  = 0.01, # Ratio between Rd25 and Vcmax25
     # Mesophyll conductance
-    gm25 = 0.4, # Mesophyll conductance (mol/m2/s)
+    chi_gm = 0.125*14/0.65, # Relationship between gm and Np (1/s)
+    #gm25 = 0.4, # Mesophyll conductance (mol/m2/s)
     E_gm = 70.2, # Activation energy gm (kJ/mol)
     S_gm = 0.32, # Entropy coefficient of gm (kJ/mol/K)
     D_gm = 94.0, # Deactivation energy of gm (kJ/mol)
@@ -72,7 +73,7 @@ function parameters(;
     S_Jmax = S_Jmax*1e3,
     E_Rd = E_Rd*1e3,
     f_Rd  = f_Rd,
-    gm25 = gm25,
+    chi_gm = chi_gm,
     E_gm = E_gm*1e3,
     S_gm = S_gm*1e3,
     D_gm = D_gm*1e3,

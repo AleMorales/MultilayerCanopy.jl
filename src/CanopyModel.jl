@@ -15,6 +15,7 @@ struct Canopy{N, N1, N12}
     Vcmax25::SVector{N, Float64}
     Rd25::SVector{N, Float64}
     Jmax25::SVector{N, Float64}
+    gm25::SVector{N, Float64}
     alpha::SVector{N, Float64}
     sigma::SVector{N1, Float64}
 end
@@ -44,10 +45,11 @@ function Canopy(pars, vars, ::Val{N} = Val(15)) where N
     Vcmax25 = pars.ar.*f_Nr.*Np
     Jmax25 = pars.aj.*f_Nt.*Np
     Rd25 = pars.f_Rd.*Vcmax25
+    gm25  = pars.chi_gm.*Np
     # Scattering coefficient of each layer from chlorophyll content (+ soil)
     sigma = vcat(1.0 .- alpha, pars.sigma_soil)
     # Construct the object
-    Canopy{N, N + 1, (N + 1)*(N + 1)}(DeltaL, Lm, Lu, Fu, Fd, fdif, Vcmax25,  Rd25, Jmax25, alpha, sigma)
+    Canopy{N, N + 1, (N + 1)*(N + 1)}(DeltaL, Lm, Lu, Fu, Fd, fdif, Vcmax25,  Rd25, Jmax25, gm25, alpha, sigma)
 end
 
 # Extinction coefficients to different sectors of the sky given a leaf angle distribution
@@ -222,7 +224,7 @@ end
 function layer_assimilation(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib0) where {N,N1, N12}
 
     k2ll, Jmax, Vcmax, Kmapp, Rd, gamma_star, gm, fvpd = 
-            temperature_correction(can.alpha, can.Jmax25, can.Rd25, can.Vcmax25, env.Tleaf, env.VPD, pars)
+            temperature_correction(can.alpha, can.Jmax25, can.Rd25, can.Vcmax25, can.gm25, env.Tleaf, env.VPD, pars)
 
     # Photosynthesis limited by Rubisco per layer
     Ac = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, Kmapp, Vcmax, gamma_star, Rd, env.Ca)
@@ -234,7 +236,7 @@ function layer_assimilation(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib0) wher
     
     # Calculate photosynthesis of sunlit leaves
     @inbounds Asun = SVector{N, Float64}(calc_Asun(env, pars, Ib0, Ishade[i], Ac[i], Rd[i], k2ll[i], Jmax[i],
-                                                   gamma_star, gm, fvpd) for i in 1:N)
+                                                   gamma_star, gm[i], fvpd) for i in 1:N)
 
     return Ashade, Asun
 end
@@ -306,7 +308,7 @@ end
 function layer_excess(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib0, Isun) where {N,N1, N12}
 
     k2ll, Jmax, Vcmax, Kmapp, Rd, gamma_star, gm, fvpd = 
-            temperature_correction(can.alpha, can.Jmax25, can.Rd25, can.Vcmax25, env.Tleaf, env.VPD, pars)
+            temperature_correction(can.alpha, can.Jmax25, can.Rd25, can.Vcmax25, can.gm25, env.Tleaf, env.VPD, pars)
 
     # Electron transport limited by Rubisco per layer
     Ac  = CalcAnC3.(gm, pars.gs0, fvpd, pars.gb, Kmapp, Vcmax, gamma_star, Rd, env.Ca)
@@ -323,7 +325,7 @@ function layer_excess(can::Canopy{N,N1, N12}, env, pars, Ishade, Ib0, Isun) wher
     
     # Calculate photosynthesis of sunlit leaves
     @inbounds Esun = SVector{N, Float64}(calc_Esun(env, pars, Ib0, Ishade[i], Isun[i], Jc[i], Rd[i], k2ll[i], Jmax[i],
-                                                   gamma_star, gm, fvpd) for i in 1:N)
+                                                   gamma_star, gm[i], fvpd) for i in 1:N)
 
     return Eshade, Esun
 end
