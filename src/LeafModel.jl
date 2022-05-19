@@ -36,7 +36,7 @@ function temperature_correction(alpha, Jmax25, Rd25, Vcmax25, Tleaf, VPD, pars)
     Sco   = arrhenius(Tleaf, pars.Sco25, pars.E_Sco)
     gamma_star = (0.5*O2)/Sco
     gm = peaked(Tleaf, pars.gm25, pars.E_gm, pars.S_gm, pars.D_gm)
-    fvpd = 1.0/(1.0 + VPD/pars.D0)
+    fvpd = 1.0/(1.0/(pars.a1 - pars.b1*VPD) - 1.0)
 
     return k2ll, Jmax, Vcmax, Kmapp, Rd, gamma_star, gm, fvpd
 end

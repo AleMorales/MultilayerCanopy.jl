@@ -35,8 +35,8 @@ function parameters(;
     D_gm = 94.0, # Deactivation energy of gm (kJ/mol)
     # Stomatal conductance
     gs0 = 0.05/1.56, # Minimum stomatal conductance (mol/m2/s)
-    sgs = 3.0, # Scaling factor between gross assimilation and stomatal conductance
-    D0 = 1.5,  # Sensitive of gs to VPD (kPa)
+    a1 = 0.9, # Empirical parameter capturing the effect of VPD on stomatal conductance
+    b1 = 0.15, # Empirical parameter capturing the effect of VPD on stomatal conductance (1/kPa)
     # Boundary layer conductance
     gb = 0.5, # Boundary layer conductance (mol/m2/s)
     # Parameters related to canopy structure
@@ -77,8 +77,8 @@ function parameters(;
     S_gm = S_gm*1e3,
     D_gm = D_gm*1e3,
     gs0 = gs0,
-    sgs = sgs,
-    D0 = D0*1e3,
+    a1 = a1,
+    b1 = b1/1e3,
     gb = gb,
     Ncmin = Ncmin,
     angles = angles,
